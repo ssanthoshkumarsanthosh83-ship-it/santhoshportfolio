@@ -1,0 +1,178 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 80px;
+  }
+
+  body {
+    @apply font-sans antialiased;
+  }
+
+  .dark body {
+    @apply bg-dark-950 text-gray-100;
+  }
+}
+
+@layer components {
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary-500 via-primary-600 to-accent-500 bg-clip-text text-transparent;
+  }
+
+  .gradient-bg {
+    @apply bg-gradient-to-r from-primary-500 to-accent-500;
+  }
+
+  .glass-card {
+    @apply bg-white/80 dark:bg-dark-800/80 backdrop-blur-lg border border-white/20 dark:border-dark-700/50 rounded-2xl shadow-xl;
+  }
+
+  .glass-button {
+    @apply bg-white/10 backdrop-blur-md border border-white/20 rounded-xl hover:bg-white/20 transition-all duration-300;
+  }
+
+  .section-title {
+    @apply text-3xl md:text-4xl lg:text-5xl font-heading font-bold text-center mb-4;
+  }
+
+  .section-subtitle {
+    @apply text-lg md:text-xl text-gray-600 dark:text-gray-400 text-center max-w-2xl mx-auto mb-12;
+  }
+
+  .btn-primary {
+    @apply px-6 py-3 bg-gradient-to-r from-primary-500 to-primary-600 text-white font-semibold rounded-xl shadow-lg shadow-primary-500/30 hover:shadow-xl hover:shadow-primary-500/40 transform hover:-translate-y-0.5 transition-all duration-300;
+  }
+
+  .btn-secondary {
+    @apply px-6 py-3 bg-white dark:bg-dark-800 text-primary-600 dark:text-primary-400 font-semibold rounded-xl border-2 border-primary-500 hover:bg-primary-50 dark:hover:bg-dark-700 transform hover:-translate-y-0.5 transition-all duration-300;
+  }
+
+  .card-hover {
+    @apply transform hover:scale-105 hover:-translate-y-2 transition-all duration-300;
+  }
+
+  .input-field {
+    @apply w-full px-4 py-3 bg-gray-50 dark:bg-dark-800 border border-gray-200 dark:border-dark-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none transition-all duration-300;
+  }
+
+  .nav-link {
+    @apply text-gray-700 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 font-medium transition-colors duration-200;
+  }
+
+  .nav-link-active {
+    @apply text-primary-600 dark:text-primary-400 font-semibold;
+  }
+}
+
+@layer utilities {
+  .animate-delay-100 {
+    animation-delay: 100ms;
+  }
+
+  .animate-delay-200 {
+    animation-delay: 200ms;
+  }
+
+  .animate-delay-300 {
+    animation-delay: 300ms;
+  }
+
+  .animate-delay-500 {
+    animation-delay: 500ms;
+  }
+
+  .animate-delay-700 {
+    animation-delay: 700ms;
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-gray-100 dark:bg-dark-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-gray-300 dark:bg-dark-600 rounded-full hover:bg-gray-400 dark:hover:bg-dark-500;
+}
+
+/* Progress bar animation */
+.progress-bar {
+  transition: width 1.5s ease-in-out;
+}
+
+/* Timeline styles */
+.timeline-line {
+  @apply absolute left-1/2 transform -translate-x-1/2 w-0.5 bg-gradient-to-b from-primary-500 to-accent-500;
+}
+
+/* Glow effect for profile image */
+.profile-glow {
+  animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+  0% {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.4), 0 0 40px rgba(59, 130, 246, 0.2);
+  }
+  100% {
+    box-shadow: 0 0 40px rgba(59, 130, 246, 0.6), 0 0 80px rgba(59, 130, 246, 0.4);
+  }
+}
+
+/* Typing cursor */
+.typing-cursor::after {
+  content: '|';
+  animation: blink 0.75s step-end infinite;
+}
+
+@keyframes blink {
+  from, to {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Card shine effect on hover */
+.card-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.card-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.2),
+    transparent
+  );
+  transition: left 0.5s;
+}
+
+.card-shine:hover::before {
+  left: 100%;
+}

@@ -1,129 +1,189 @@
-import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Navbar from './components/Navbar';
-import Hero from './components/Hero';
-import About from './components/About';
-import Skills from './components/Skills';
-import Education from './components/Education';
-import Certifications from './components/Certifications';
-import Projects from './components/Projects';
-import Experience from './components/Experience';
-import Achievements from './components/Achievements';
-import Resume from './components/Resume';
-import Contact from './components/Contact';
-import Footer from './components/Footer';
-import ScrollToTop from './components/ScrollToTop';
-import LoadingScreen from './components/LoadingScreen';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { MainLayout } from './components/layout';
+
+// Auth Pages
+import { Login, Register } from './pages/auth';
+
+// Admin Pages
+import { AdminDashboard, ManageUsers, ManageJobs, Reports } from './pages/admin';
+
+// Job Seeker Pages
+import {
+  JobSeekerDashboard,
+  BrowseJobs,
+  MyApplications,
+  SavedJobs,
+  JobSeekerProfile,
+} from './pages/job-seeker';
+
+// Recruiter Pages
+import { RecruiterDashboard, MyJobs, Applicants, CompanyProfile } from './pages/recruiter';
+
+// Protected Route Component
+const ProtectedRoute = ({ children, allowedRoles }: { children: React.ReactNode; allowedRoles: string[] }) => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-gray-600 dark:text-gray-400">Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (!allowedRoles.includes(user.role)) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
+  return <>{children}</>;
+};
+
+// Dashboard Router - Routes to appropriate dashboard based on role
+const DashboardRouter = () => {
+  const { user } = useAuth();
+
+  if (!user) return null;
+
+  switch (user.role) {
+    case 'admin':
+      return <AdminDashboard />;
+    case 'recruiter':
+      return <RecruiterDashboard />;
+    case 'job_seeker':
+      return <JobSeekerDashboard />;
+    default:
+      return <JobSeekerDashboard />;
+  }
+};
+
+function AppRoutes() {
+  return (
+    <Routes>
+      {/* Public Routes */}
+      <Route path="/login" element={<Login />} />
+      <Route path="/register" element={<Register />} />
+
+      {/* Protected Routes */}
+      <Route
+        path="/"
+        element={
+          <ProtectedRoute allowedRoles={['admin', 'recruiter', 'job_seeker']}>
+            <MainLayout />
+          </ProtectedRoute>
+        }
+      >
+        {/* Dashboard */}
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<DashboardRouter />} />
+
+        {/* Admin Routes */}
+        <Route
+          path="users"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ManageUsers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="jobs"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <ManageJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="reports"
+          element={
+            <ProtectedRoute allowedRoles={['admin']}>
+              <Reports />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Job Seeker Routes */}
+        <Route
+          path="jobs"
+          element={
+            <ProtectedRoute allowedRoles={['job_seeker', 'admin']}>
+              <BrowseJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="applications"
+          element={
+            <ProtectedRoute allowedRoles={['job_seeker']}>
+              <MyApplications />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="saved-jobs"
+          element={
+            <ProtectedRoute allowedRoles={['job_seeker']}>
+              <SavedJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="profile"
+          element={
+            <ProtectedRoute allowedRoles={['job_seeker']}>
+              <JobSeekerProfile />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Recruiter Routes */}
+        <Route
+          path="my-jobs"
+          element={
+            <ProtectedRoute allowedRoles={['recruiter']}>
+              <MyJobs />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="applicants"
+          element={
+            <ProtectedRoute allowedRoles={['recruiter']}>
+              <Applicants />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="company-profile"
+          element={
+            <ProtectedRoute allowedRoles={['recruiter']}>
+              <CompanyProfile />
+            </ProtectedRoute>
+          }
+        />
+      </Route>
+
+      {/* Catch all */}
+      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+    </Routes>
+  );
+}
 
 function App() {
-  const [darkMode, setDarkMode] = useState(false);
-  const [activeSection, setActiveSection] = useState('home');
-  const [loading, setLoading] = useState(true);
-  const [showScrollTop, setShowScrollTop] = useState(false);
-
-  // Initialize dark mode from localStorage or system preference
-  useEffect(() => {
-    const savedTheme = localStorage.getItem('theme');
-    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-
-    if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-  }, []);
-
-  // Simulate loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-    return () => clearTimeout(timer);
-  }, []);
-
-  // Track scroll for active section and scroll-to-top button
-  useEffect(() => {
-    const handleScroll = () => {
-      // Show/hide scroll to top button
-      setShowScrollTop(window.scrollY > 500);
-
-      // Determine active section
-      const sections = [
-        'home',
-        'about',
-        'skills',
-        'education',
-        'certifications',
-        'projects',
-        'experience',
-        'achievements',
-        'resume',
-        'contact',
-      ];
-
-      for (const section of sections) {
-        const element = document.getElementById(section);
-        if (element) {
-          const rect = element.getBoundingClientRect();
-          if (rect.top <= 150 && rect.bottom >= 150) {
-            setActiveSection(section);
-            break;
-          }
-        }
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
-  // Toggle dark mode
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    if (darkMode) {
-      document.documentElement.classList.remove('dark');
-      localStorage.setItem('theme', 'light');
-    } else {
-      document.documentElement.classList.add('dark');
-      localStorage.setItem('theme', 'dark');
-    }
-  };
-
   return (
-    <div className="min-h-screen bg-white dark:bg-dark-950 transition-colors duration-300">
-      <AnimatePresence>
-        {loading && <LoadingScreen key="loading" />}
-      </AnimatePresence>
-
-      {!loading && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5 }}
-        >
-          <Navbar
-            activeSection={activeSection}
-            darkMode={darkMode}
-            toggleDarkMode={toggleDarkMode}
-          />
-
-          <main>
-            <Hero />
-            <About />
-            <Skills />
-            <Education />
-            <Certifications />
-            <Projects />
-            <Experience />
-            <Achievements />
-            <Resume />
-            <Contact />
-          </main>
-
-          <Footer />
-          <ScrollToTop show={showScrollTop} />
-        </motion.div>
-      )}
-    </div>
+    <BrowserRouter>
+      <AuthProvider>
+        <AppRoutes />
+      </AuthProvider>
+    </BrowserRouter>
   );
 }
 
